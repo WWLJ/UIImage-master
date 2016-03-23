@@ -69,11 +69,10 @@
  *
  *  @param borderW 边框的宽度
  *  @param color   边框的颜色
- *  @param image   原始image
  *
  *  @return 带边框的image
  */
-+ (UIImage *)imageWithBorderW:(CGFloat)borderW borderColor:(UIColor *)color image:(UIImage *)image;
+- (UIImage *)imageWithBorderW:(CGFloat)borderW borderColor:(UIColor *)color;
 
 /**
  *  屏幕截图
@@ -96,6 +95,14 @@
 + (UIImage *)waterImageWith:(UIImage *)image logo:(UIImage *)logoImage;
 
 
-
+/**
+ *  生成指定大小的image
+ *
+ *  @param size    指定大小
+ *  @param isScale 是否等比例缩放(默认YES)
+ *
+ *  @return 返回指定大小的image
+ */
+- (UIImage *)cropEqualScaleImageToSize:(CGSize)size isScale:(BOOL)isScale;
 
 @end

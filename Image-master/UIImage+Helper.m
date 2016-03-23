@@ -166,20 +166,20 @@
 
 
 
-+ (UIImage *)imageWithBorderW:(CGFloat)borderW borderColor:(UIColor *)color image:(UIImage *)image
+- (UIImage *)imageWithBorderW:(CGFloat)borderW borderColor:(UIColor *)color
 {
     //开启图片大小一样的上下文
-    CGSize size = CGSizeMake(image.size.width + 2 *borderW, image.size.height + 2 * borderW);
+    CGSize size = CGSizeMake(self.size.width + 2 *borderW, self.size.height + 2 * borderW);
     UIGraphicsBeginImageContextWithOptions(size,NO,0);
     //添加一个填充区域
     UIBezierPath *path = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(0, 0, size.width, size.height)];
     [color set];
     [path fill];
     //添加一个裁剪区域
-    path = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(borderW, borderW, image.size.width, image.size.height)];
+    path = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(borderW, borderW, self.size.width, self.size.height)];
     [path addClip];
     //添加图片到裁剪区域
-    [image drawAtPoint:CGPointMake(borderW, borderW)];
+    [self drawAtPoint:CGPointMake(borderW, borderW)];
     //得到新图片
     UIImage *clipImage = UIGraphicsGetImageFromCurrentImageContext();
     //关闭上下文.
@@ -230,5 +230,46 @@
     
     return newImage;
 }
+
+
+- (UIImage *)cropEqualScaleImageToSize:(CGSize)size isScale:(BOOL)isScale
+{
+    if (!isScale) {
+        CGFloat scale =  [UIScreen mainScreen].scale;
+        
+        UIGraphicsBeginImageContextWithOptions(size, NO, scale);
+        
+        [self drawInRect:CGRectMake(0, 0, size.width, size.height)];
+        UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+        
+        return image;
+    }
+    CGFloat scale =  [UIScreen mainScreen].scale;
+    
+    // 这一行至关重要
+    // 不要直接使用UIGraphicsBeginImageContext(size);方法
+    // 因为控件的frame与像素是有倍数关系的
+    // 比如@1x、@2x、@3x图，因此我们必须要指定scale，否则黄色去不了
+    // 因为在5以上，scale为2，6plus scale为3，所生成的图是要合苹果的
+    // 规格才能正常
+    UIGraphicsBeginImageContextWithOptions(size, NO, scale);
+    
+    CGSize aspectFitSize = CGSizeZero;
+    if (self.size.width != 0 && self.size.height != 0) {
+        CGFloat rateWidth = size.width / self.size.width;
+        CGFloat rateHeight = size.height / self.size.height;
+        
+        CGFloat rate = MIN(rateHeight, rateWidth);
+        aspectFitSize = CGSizeMake(self.size.width * rate, self.size.height * rate);
+    }
+    
+    [self drawInRect:CGRectMake(0, 0, aspectFitSize.width, aspectFitSize.height)];
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    return image;
+}
+
 
 @end
